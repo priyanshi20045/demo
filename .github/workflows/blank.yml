@@ -29,19 +29,21 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
+          cache-dependency-path: student/pom.xml
 
       # 3. Maven build and JUnit testing
       - name: Maven Build and Test
+        working-directory: student
         run: mvn -B clean verify
 
       # 4. SonarQube code quality analysis
       - name: SonarQube Analysis
+        working-directory: student
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=springboot-docker-demo \
             -Dsonar.qualitygate.wait=true
 
       # 5. Setup Docker Buildx
@@ -59,7 +61,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./student
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/springboot-demo:latest
@@ -86,7 +88,7 @@ jobs:
             docker run -d \
               --name springboot-app \
               --restart unless-stopped \
-              -p 8080:8080 \
+              -p 8080:8082 \
               $IMAGE
 
             docker image prune -f
