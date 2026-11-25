@@ -90,3 +90,4 @@ jobs:
               $IMAGE
 
             docker image prune -f
+
